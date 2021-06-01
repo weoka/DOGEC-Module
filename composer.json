@@ -1,0 +1,18 @@
+{
+    "name": "weoka/dogec-module",
+    "description": "DogeCash package for the Buy Bridge",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Weoka",
+            "email": "daniel@weoka.pro"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+          "DOGECModule\\": "lib/"
+        }
+    }
+}
