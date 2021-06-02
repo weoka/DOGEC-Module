@@ -9,7 +9,9 @@
             "email": "daniel@weoka.pro"
         }
     ],
-    "require": {},
+    "require": {
+        "guzzlehttp/guzzle": "^7.3"
+    },
     "autoload": {
         "psr-4": {
           "DOGECModule\\": "lib/"
