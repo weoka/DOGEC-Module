@@ -5,11 +5,10 @@ namespace DOGECModule;
 use GuzzleHttp\Client;
 
 class DOGECModule{
-
-    const EXPLORER_URL = "https://explorer.dogec.io/api/v2/";
     
     public function __construct()
     {
+        $this->explorer_url = "https://explorer.dogec.io/api/v1/";
         $this->client = new client();
     }
 
@@ -23,8 +22,10 @@ class DOGECModule{
 
             foreach($transactions as $transaction)
             {
-                $transaction = $this->getTransaction($transaction);
-                if($transaction['time'] < $timestamp)
+                $transaction_info = $this->getTransaction($transaction);
+
+                //allowing only unconfirmed transactions & confirmed transactions newer than $timestamp
+                if($transaction_info['blocktime'] != 0 && $transaction_info['blocktime'] < $timestamp)
                 {
                     //transaction doesn't exist
                     return [
@@ -33,14 +34,14 @@ class DOGECModule{
                     ];
                 }
 
-                foreach($transaction['vout'] as $vout)
+                foreach($transaction_info['vout'] as $vout)
                 {
                     if($vout['value'] == $amount && $vout['scriptPubKey']['addresses'][0] == $address)
                     {
                         return [
                             'exists' => true,
-                            'txid' => $transaction;
-                        ]
+                            'txid' => $transaction
+                        ];
                     }
                 }
             }
@@ -73,13 +74,11 @@ class DOGECModule{
     public function getAddressTransactions($address)
     {
         try{
-            $addressEndpoint = EXPLORER_URL . "/address/$address"; 
-            
-            $transactions = $this->client('GET', $addressEndpoint);
+            $addressEndpoint = $this->explorer_url . "address/$address";            
+            $transactions = $this->client->request('GET', $addressEndpoint);
 
             //convert response into array
-            $transactions_array = (json_decode($response->getBody()->getContents(), true))['transactions'];
-
+            $transactions_array = (json_decode($transactions->getBody()->getContents(), true))['transactions'];
             return $transactions_array;
         }
         catch (\Throwable $e){
@@ -93,12 +92,11 @@ class DOGECModule{
     public function getTransaction($txid)
     {
         try{
-            $transactionEndpoint = EXPLORER_URL . "/tx/$txid"; 
-            
-            $transaction = $this->client('GET', $transactionEndpoint);
+            $transactionEndpoint = $this->explorer_url . "tx/$txid"; 
+            $transaction = $this->client->request('GET', $transactionEndpoint);
 
             //convert response into array
-            $transaction = json_decode($response->getBody()->getContents(), true);
+            $transaction = json_decode($transaction->getBody()->getContents(), true);
 
             return $transaction;
         }
