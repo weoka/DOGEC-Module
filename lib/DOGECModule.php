@@ -8,7 +8,8 @@ class DOGECModule{
     
     public function __construct()
     {
-        $this->explorer_url = "https://explorer.dogec.io/api/v1/";
+        $this->explorer_url = "https://dogec.flitswallet.app/api/v1/";
+		$this->price_url = "https://api.coingecko.com/api/v3/simple/price?ids=dogecash&vs_currencies=";
         $this->client = new client();
     }
 
@@ -49,7 +50,7 @@ class DOGECModule{
         }
         catch(\Throwable $e)
         {
-            throw $e;
+            return false;
         }
         
     }
@@ -104,5 +105,24 @@ class DOGECModule{
             throw $e;
         }
     }
+	
+	//
+	//Get currency price
+	//
+	public function getPrice($currency)
+	{
+		try {
+			$priceEndpoint = $this->price_url . $currency;
+			$price = $this->client->request('GET', $priceEndpoint);
+			
+			$price = json_decode($price->getBody()->getContents(), true);
+			
+			return $price['dogecash'][$currency];
+		}
+		catch (\Throwable $e) {
+			throw $e;
+		}
+
+	}
 
 }
