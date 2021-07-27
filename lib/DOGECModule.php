@@ -21,6 +21,15 @@ class DOGECModule{
         try{
             $transactions = $this->getAddressTransactions($address);
 
+            if( !$transactions )
+            {
+                //transaction doesn't exist
+                return [
+                    'exists' => false,
+                    'txid' => ""
+                ];
+            }
+
             foreach($transactions as $transaction)
             {
                 $transaction_info = $this->getTransaction($transaction);
@@ -50,7 +59,7 @@ class DOGECModule{
         }
         catch(\Throwable $e)
         {
-            return false;
+            throw $e;
         }
         
     }
@@ -76,10 +85,16 @@ class DOGECModule{
     {
         try{
             $addressEndpoint = $this->explorer_url . "address/$address";            
-            $transactions = $this->client->request('GET', $addressEndpoint);
+            $response = $this->client->request('GET', $addressEndpoint);
+            $content = json_decode( $response->getBody()->getContents(), true);
 
+            if( !isset($content['transactions']) )
+            {
+                return false;
+            }
+           
             //convert response into array
-            $transactions_array = (json_decode($transactions->getBody()->getContents(), true))['transactions'];
+            $transactions_array = $content['transactions'];
             return $transactions_array;
         }
         catch (\Throwable $e){
